@@ -1,0 +1,20 @@
+// Replace 'YourSoftwareName' with the actual name of the software you want to search for
+let softwareName = "YourSoftwareName";
+
+// Look into event logs for specific event IDs related to the software (adjust event IDs as needed)
+let eventLogs = Event
+| where TimeGenerated >= ago(1d) // Optionally, you can restrict the time frame
+| where EventID in (100, 200, 300) // Adjust event IDs relevant to your software
+| where tostring(EventData) contains softwareName;
+
+// Look into performance data (adjust counters as needed)
+let performanceData = Perf
+| where TimeGenerated >= ago(1d) // Optionally, you can restrict the time frame
+| where CounterName == "YourCounterName" // Replace with the appropriate performance counter name
+| where InstanceName == "YourInstanceName" // Replace with the appropriate instance name if relevant
+| where CounterValue > 0;
+
+// Union the results from event logs and performance data
+union eventLogs, performanceData
+| project TimeGenerated, Computer, SoftwareName = softwareName, Source = "EventLog or Performance" // Create a common column to indicate the source
+| order by TimeGenerated desc // Optionally, you can order the results by time
